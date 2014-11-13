@@ -1,0 +1,70 @@
+Scenario.name = PEQUE_TIME_%%Scenario.endTime%%_Routing_%%Group.router%%_HOSTS_%%Group.nrofHosts%%_EVENT_%%Events1.hosts%%
+Scenario.simulateConnections = true
+
+Scenario.updateInterval = 0.1
+Scenario.nrofHostGroups = 1
+Scenario.endTime =18000
+Scenario.individualActivity = true
+Group.indActivityCapability = true
+Group.movementModel =  ExternalPathMovement
+Group.traceFile = Paths18000.txt
+Group.activeFile = Active18000.txt
+Group.nrofHosts =829
+
+
+Group.router = EpidemicBasedMap
+
+Group.indActivityCapability = true
+
+highspeedInterface.type = SimpleBroadcastInterface
+highspeedInterface.transmitSpeed = 0.0625M
+#highspeedInterface.transmitRange = [10;30;50;70;90;110;130;150;170;190;210;230;250]
+#highspeedInterface.transmitRange = [50;100;150;200;250]
+highspeedInterface.transmitRange = 250
+highspeedInterface.activityFile = RadioActivos18000.txt
+Group.bufferSize = 2G
+Group.waitTime = 0, 50
+Group.nrofInterfaces = 1
+Group.interface1 = highspeedInterface
+Group.msgTtl = 300
+Group.groupID = i
+Events.nrof = 1
+Events1.class = MessageEventGenerator
+
+Events1.interval = 59,60
+Events1.size = 0.0128M
+Events1.hosts = 0,828
+Events1.prefix = M
+MovementModel.rngSeed = 1
+MovementModel.worldSize = 8100,18100
+MovementModel.warmup = 0
+MapBasedMovement.nrofMapFiles = 0
+Report.nrofReports = 12
+Report.warmup = 0
+Report.granularity=5
+Report.MessageCopyCountReport=5
+Report.reportDir = reports/18000/MetricasMapa/
+Report.report1 = MessageStatsReport
+Report.report2 = DeliveredMessagesReport
+Report.report3 = ContactTimesReport
+Report.report4 = DistanceDelayReport
+Report.report5 = InterContactTimesReport
+Report.report6 = MessageCopyCountReport
+Report.report7 = MessageDelayReport
+#Report.report8 = TotalEncountersReport
+#Report.report9 = RegisterClassesReport
+#Report.report9 = EventLogReport
+Report.report8 = GraphCorrelationReport
+Report.report9 = VelocityReport
+#Report.report9 = MovilityConnectivityReport
+Report.report10 = ConnectivityMetricsReport
+Report.report11 =GraphTheoryMetricsReport
+Report.report12 =CentricityReport
+Optimization.cellSizeMult = 5
+Optimization.randomizeUpdateOrder = true
+GUI.UnderlayImage.fileName = data/lado_izquierdo.png
+#GUI.UnderlayImage.offset = 64, 20
+GUI.UnderlayImage.offset = -11, -5
+GUI.UnderlayImage.scale = 34.5
+#GUI.UnderlayImage.rotate = -0.015
+GUI.UnderlayImage.rotate = 0

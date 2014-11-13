@@ -1,0 +1,1 @@
+java -Xmx4096M -cp .;lib/ECLA.jar;lib/DTNConsoleConnection.jar;F:/Experimentos/weka/bin/ core.DTNSim %*
