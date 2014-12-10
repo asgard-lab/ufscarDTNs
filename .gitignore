@@ -1,2 +1,14 @@
 *.class
 *.java~
+*.txt
+*.bat
+*.html
+*.wkt
+*.png
+*.sh
+*.gif
+*.jar
+*.pl
+*.diff
+*.pm
+*.py
