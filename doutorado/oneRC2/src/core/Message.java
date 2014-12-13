@@ -55,6 +55,17 @@ public class Message implements Comparable<Message> {
 	/** Application ID of the application that created the message */
 	private String	appID;
 	
+	//agregado
+
+	public int intervalReception = -1;
+	public int liReception = -1;
+	public String zoneReception = "";
+	public Coord recievedLocation = null;
+	public double timeReception =0;
+	
+	
+	/////
+	
 	static {
 		reset();
 		DTNSim.registerForReset(Message.class.getCanonicalName());
@@ -273,6 +284,9 @@ public class Message implements Comparable<Message> {
 		this.requestMsg  = m.requestMsg;
 		this.initTtl = m.initTtl;
 		this.appID = m.appID;
+		
+		
+		
 		
 		if (m.properties != null) {
 			Set<String> keys = m.properties.keySet();

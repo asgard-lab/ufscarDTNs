@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import classification.WekaTheOne;
+
 /**
  * World contains all the nodes and is responsible for updating their
  * location and connections.
@@ -57,7 +59,12 @@ public class World {
 	private ScheduledUpdatesQueue scheduledUpdates;
 	private boolean simulateConOnce;
 	private boolean isConSimulated;
+//agregado
+	public boolean flagClassificatorTrained;
+	public WekaTheOne datasetClassifier = null;
+	public String classificationDistanceFileName="F:\\Experimentos\\oneSaWC4\\train\\distanceClassification.arff";
 
+/////
 	/**
 	 * Constructor.
 	 */
