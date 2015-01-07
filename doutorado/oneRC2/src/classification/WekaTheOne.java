@@ -40,11 +40,11 @@ public class WekaTheOne {
 	public String classifier(double interval, double lobby, String zone,
 			String node) {
 		double[] values = new double[dataset.numAttributes()];
-
-		values[0] = interval;
-		values[1] = lobby;
-		values[2] = getDataset().attribute(2).indexOfValue(zone);
-		values[3] = getDataset().attribute(3).indexOfValue(node);
+		values[0] = getDataset().attribute(0).indexOfValue(node);
+		values[1] = interval;
+		values[2] = lobby;
+		values[3] = getDataset().attribute(3).indexOfValue(zone);
+		
 		values[4] = dataset.attribute(4).indexOfValue("?");
 		Instance unlabeled = new Instance(1.0, values);
 		unlabeled.setDataset(dataset);
@@ -62,6 +62,7 @@ public class WekaTheOne {
 
 	public void setClassifier() {
 		this.Algorithm = new J48();
+		this.Algorithm.setUnpruned(true); 
 		try {
 			BufferedReader reader = new BufferedReader(fileReader);
 			dataset = new Instances(reader);

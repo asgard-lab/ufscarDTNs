@@ -17,7 +17,8 @@ import core.SimScenario;
 
 public class ClassifierRouter extends ActiveRouter {
 	protected boolean isCollecting;
-	protected String generalPath;
+	protected String generalPath = "";
+	public static String classificationFile;
 	protected String zonesGrids[][] = null;
 	protected int nroZonesX = 0;
 	protected int nroZonesY = 0;
@@ -27,31 +28,46 @@ public class ClassifierRouter extends ActiveRouter {
 	public static final String CLASSIFIER_ROUTER_NS = "ClassifierRouter";
 	protected static final String COLLECTING_FASE = "isCollecting";
 	protected static final String PATH_S = "ClassifierFilesPath";
+	protected static final String CLASSIFIERFILE_S = "ClassifierFile";
+
 	/** SprayAndWait router's settings name space ({@value} ) */
 
 	protected ClassifierRouter(ClassifierRouter r) {
 		super(r);
 		this.isCollecting = r.isCollecting;
 		this.receivedMessageData = new HashMap<String, MessageRecievedInformation>();
-		this.generalPath=r.generalPath;
+
+		this.generalPath = r.generalPath;
 		initWorldsize();
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	public ClassifierRouter(Settings s) {
 		super(s);
 		Settings snwSettings = new Settings(CLASSIFIER_ROUTER_NS);
 		setCollecting(snwSettings.getBoolean(COLLECTING_FASE));
-		this.generalPath= snwSettings.getSetting(this.PATH_S);
-		
-		File f = new File(this.generalPath);
-		if (!f.exists() || !f.isDirectory()) {
-			throw new SettingsError("The classifier folder does not exists or is not a valid folder");
+		if (this.isCollecting == true) {
+			this.generalPath = snwSettings.getSetting(this.PATH_S);
+
+			File f = new File(this.generalPath);
+			if (!f.exists() || !f.isDirectory()) {
+				throw new SettingsError(
+						"The classifier folder does not exists or is not a valid folder");
+			}
 		}
-		
-		
-		
+		else
+		{
+			this.classificationFile = snwSettings.getSetting(this.CLASSIFIERFILE_S);
+
+			File f = new File(this.classificationFile);
+			if (!f.exists() || f.isDirectory()) {
+				throw new SettingsError(
+						"The classifier folder does not exists or is not a valid folder");
+			}
+		}
+
 	}
+
 	private void initWorldsize() {
 		// TODO Auto-generated method stub
 		Settings s = new Settings(SimScenario.SCENARIO_NS);
@@ -76,9 +92,7 @@ public class ClassifierRouter extends ActiveRouter {
 		this.zonesGrids = new String[getNroZonesX()][getNroZonesY()];
 		iniciarGrids();
 	}
-	
-	
-	
+
 	public String getZone(Coord c) {
 		int x = 0, y = 0;
 		double dx = c.getX();
@@ -115,7 +129,7 @@ public class ClassifierRouter extends ActiveRouter {
 	protected void setCollecting(boolean isCollecting) {
 		this.isCollecting = isCollecting;
 	}
-	
+
 	public int getNroZonesX() {
 		return nroZonesX;
 	}
@@ -132,13 +146,12 @@ public class ClassifierRouter extends ActiveRouter {
 		this.nroZonesY = nroZonesY;
 	}
 
-	
 	@Override
 	public MessageRouter replicate() {
 		// TODO Auto-generated method stub
 		return new ClassifierRouter(this);
 	}
-	
+
 	private class MessageRecievedInformation {
 		private int timeInterval = 0;
 		private int li = 0;
@@ -146,6 +159,7 @@ public class ClassifierRouter extends ActiveRouter {
 		private Coord recievedLocation = null;
 		private double recievedTime = 0;
 	}
+
 	public void registerMessageRecieved(String id, int interval, int li,
 			String zone, Coord c, double time) {
 		// TODO Auto-generated method stub
@@ -158,6 +172,7 @@ public class ClassifierRouter extends ActiveRouter {
 		info.recievedTime = time;
 		this.receivedMessageData.put(id, info);
 	}
+
 	public String getReceivedMessageInformation(String m) {
 		if (this.receivedMessageData.containsKey(m)) {
 			DTNHost host = this.getHost();
@@ -173,6 +188,7 @@ public class ClassifierRouter extends ActiveRouter {
 		} else
 			return "";
 	}
+
 	private void writeHeaderArff(String fileName, String tmp) {
 		// TODO Auto-generated method stub
 		File log = new File(fileName);
@@ -193,10 +209,10 @@ public class ClassifierRouter extends ActiveRouter {
 		}
 
 	}
+
 	public void reinitiateReceivedMessageInformation() {
 		if (this.receivedMessageData != null)
 			this.receivedMessageData.clear();
 	}
-
 
 }

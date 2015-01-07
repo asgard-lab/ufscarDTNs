@@ -1,5 +1,6 @@
 package classification;
 
+import routing.ClassifierRouter;
 import core.SimScenario;
 import core.World;
 
@@ -65,7 +66,7 @@ public class Classifier {
 		if (w.flagClassificatorTrained == false) {
 			w.datasetClassifier = new WekaTheOne();
 			if (w.datasetClassifier
-					.initTraining(w.classificationDistanceFileName) == true) {
+					.initTraining(ClassifierRouter.classificationFile) == true) {
 				w.flagClassificatorTrained = true;
 				this.classifierMode = true;
 				this.setFase(this.test);
