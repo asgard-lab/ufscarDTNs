@@ -1,15 +1,20 @@
-
 package routing;
 
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 import core.Connection;
 import core.DTNHost;
 import core.Message;
 import core.Settings;
 import core.SimClock;
-
+import core.SimError;
 
 /**
  * Implementation of Spray and wait router as depicted in <I>Spray and Wait: An
@@ -22,7 +27,7 @@ public class SaWClassifiedRouter extends ClassifierRouter {
 	public static final String NROF_COPIES = "nrofCopies";
 	/** identifier for the binary-mode setting ({@value} ) */
 	public static final String BINARY_MODE = "binaryMode";
-	
+
 	public static final String SPRAYANDWAIT_NS = "SaWClassifiedRouter";
 	/** Message property key */
 	public static final String MSG_COUNT_PROPERTY = SPRAYANDWAIT_NS + "."
@@ -30,14 +35,14 @@ public class SaWClassifiedRouter extends ClassifierRouter {
 
 	protected int initialNrofCopies;
 	protected boolean isBinary;
-	
+	private Map<Integer, double[]> evolvingProbability = new HashMap<Integer, double[]>();
 
 	// private int anteriorNroCopiesInPreviusZone = 0;
 
 	public SaWClassifiedRouter(Settings s) {
 		super(s);
 		Settings snwSettings = new Settings(SPRAYANDWAIT_NS);
-		
+
 		initialNrofCopies = snwSettings.getInt(NROF_COPIES);
 		isBinary = snwSettings.getBoolean(BINARY_MODE);
 	}
@@ -47,18 +52,39 @@ public class SaWClassifiedRouter extends ClassifierRouter {
 	 * 
 	 * @param r
 	 *            The router prototype where setting values are copied from
+	 * @throws IOException
 	 */
-	protected SaWClassifiedRouter(SaWClassifiedRouter r) {
+	protected SaWClassifiedRouter(SaWClassifiedRouter r) throws IOException {
 		super(r);
 		this.initialNrofCopies = r.initialNrofCopies;
 		this.isBinary = r.isBinary;
-		
+		initProbabilities();
 
-		
 	}
 
-	
-	
+	private void initProbabilities() throws IOException {
+		// TODO Auto-generated method stub
+		FileReader fr = new FileReader(
+				"D:\\one_1.5.1-RC2\\probabilitiesSaW50.txt");
+		BufferedReader br = new BufferedReader(fr);
+		String line = "";
+		while (((line = br.readLine()) != null)) {
+			StringTokenizer tokens = new StringTokenizer(line);
+			int interval = Integer.parseInt(tokens.nextToken());
+			double p1 = Double.parseDouble(tokens.nextToken());
+			double p2 = Double.parseDouble(tokens.nextToken());
+			double p3 = Double.parseDouble(tokens.nextToken());
+			double p4 = Double.parseDouble(tokens.nextToken());
+			double p5 = Double.parseDouble(tokens.nextToken());
+			if (!this.evolvingProbability.containsKey(interval)) {
+				double[] tmp = { p1, p2, p3, p4, p5 };
+				this.evolvingProbability.put(interval, tmp);
+
+			}
+		}
+
+	}
+
 	@Override
 	public int receiveMessage(Message m, DTNHost from) {
 		return super.receiveMessage(m, from);
@@ -129,8 +155,8 @@ public class SaWClassifiedRouter extends ClassifierRouter {
 
 		String id = this.getHost().toString();
 
-		String classified = this.getHost().getClassifierWeka().classifier((double) interval, li,
-				zone, id);
+		String classified = this.getHost().getClassifierWeka()
+				.classifier((double) interval, li, zone, id);
 		int classe = Integer.parseInt(classified.substring(1));
 		return classe;
 
@@ -139,7 +165,8 @@ public class SaWClassifiedRouter extends ClassifierRouter {
 	@Override
 	protected Connection tryMessagesToConnections(List<Message> messages,
 			List<Connection> connections) {
-		if (this.getHost().getClassifierWeka().getFase().equals(DTNHost.collect)) {
+		if (this.getHost().getClassifierWeka().getFase()
+				.equals(DTNHost.collect)) {
 			for (int i = 0, n = connections.size(); i < n; i++) {
 				Connection con = connections.get(i);
 				Message started = tryAllMessages(con, messages);
@@ -147,20 +174,95 @@ public class SaWClassifiedRouter extends ClassifierRouter {
 					return con;
 				}
 			}
-		} else if (this.getHost().getClassifierWeka().getFase().equals(DTNHost.test)) {
+		} else if (this.getHost().getClassifierWeka().getFase()
+				.equals(DTNHost.test)) {
 
+			/*
+			 * anterior SaW, excluyendo classe baja for (int i = 0, n =
+			 * connections.size(); i < n; i++) {
+			 * 
+			 * Connection con = connections.get(i); DTNHost other =
+			 * con.getOtherNode(this.getHost()); Message started = null;
+			 * SaWClassifiedRouter tmprouter = (SaWClassifiedRouter) other
+			 * .getRouter(); if (tmprouter.evaluate() >= 2) { started =
+			 * tryAllMessages(con, messages); } if (started != null) { return
+			 * con; } }
+			 */
+			/*
+			 * PROBABILITY VETOR 50 double[] classProbability = new double[5];
+			 * for (int i = 0, n = connections.size(); i < n; i++) { Connection
+			 * con = connections.get(i); SaWClassifiedRouter otherRouter =
+			 * (SaWClassifiedRouter) (con
+			 * .getOtherNode(this.getHost())).getRouter(); int classeThisHost =
+			 * otherRouter.evaluate(); double prob = 0; int interval = (int)
+			 * Math.round(SimClock.getTime() / 600D);
+			 * 
+			 * classProbability = this.evolvingProbability.get(interval); if
+			 * (classProbability == null) System.out.println("ERROR"); if
+			 * (classeThisHost > classProbability.length) { throw new
+			 * SimError("unreconized class number"); } else { prob =
+			 * classProbability[classeThisHost - 1]; double random =
+			 * rng.nextDouble(); if (random <= prob) { Message started =
+			 * tryAllMessages(con, messages); if (started != null) { return con;
+			 * } } }
+			 * 
+			 * }
+			 */
+			/*
+			 * deliverying to lowest nodes witha fixed probability for (int i =
+			 * 0, n = connections.size(); i < n; i++) { Connection con =
+			 * connections.get(i); SaWClassifiedRouter otherRouter =
+			 * (SaWClassifiedRouter) (con
+			 * .getOtherNode(this.getHost())).getRouter(); int classeThisHost =
+			 * otherRouter.evaluate(); if (classeThisHost >= 2) { Message
+			 * started = tryAllMessages(con, messages); if (started != null) {
+			 * return con; }
+			 * 
+			 * } else { double prob = 0.10;
+			 * 
+			 * double random = rng.nextDouble(); if (random <= prob) { Message
+			 * started = tryAllMessages(con, messages); if (started != null) {
+			 * return con; } } }
+			 * 
+			 * }
+			 */
+			/*
+			 * O menor so pode entregar a os maiores que ele. int
+			 * classThisRouter = this.evaluate(); for (int i = 0, n =
+			 * connections.size(); i < n; i++) { Connection con =
+			 * connections.get(i); SaWClassifiedRouter otherRouter =
+			 * (SaWClassifiedRouter) (con
+			 * .getOtherNode(this.getHost())).getRouter(); int classeThisHost =
+			 * otherRouter.evaluate(); if (classeThisHost >= 2) { Message
+			 * started = tryAllMessages(con, messages); if (started != null) {
+			 * return con; }
+			 * 
+			 * } else {
+			 * 
+			 * 
+			 * 
+			 * if (classeThisHost != classThisRouter) { Message started =
+			 * tryAllMessages(con, messages); if (started != null) { return con;
+			 * } } }
+			 * 
+			 * }
+			 */
+			int classThisRouter = this.evaluate();
 			for (int i = 0, n = connections.size(); i < n; i++) {
 				Connection con = connections.get(i);
-				DTNHost other = con.getOtherNode(this.getHost());
-				Message started = null;
-				SaWClassifiedRouter tmprouter = (SaWClassifiedRouter) other
-						.getRouter();
-				if (tmprouter.evaluate() >= 2) {
-					started = tryAllMessages(con, messages);
+				SaWClassifiedRouter otherRouter = (SaWClassifiedRouter) (con
+						.getOtherNode(this.getHost())).getRouter();
+				int classeThisHost = otherRouter.evaluate();
+				
+					
+
+				if ((classeThisHost > classThisRouter)||(classThisRouter==5 && classThisRouter==classeThisHost) ){
+					Message started = tryAllMessages(con, messages);
+					if (started != null) {
+						return con;
+					}
 				}
-				if (started != null) {
-					return con;
-				}
+
 			}
 
 		}
@@ -215,19 +317,18 @@ public class SaWClassifiedRouter extends ClassifierRouter {
 			nrofCopies--;
 		}
 		msg.updateProperty(MSG_COUNT_PROPERTY, nrofCopies);
-		
 
 	}
 
 	@Override
 	public SaWClassifiedRouter replicate() {
-		return new SaWClassifiedRouter(this);
+		try {
+			return new SaWClassifiedRouter(this);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
-
-	
-
-	
-
-	
 
 }
