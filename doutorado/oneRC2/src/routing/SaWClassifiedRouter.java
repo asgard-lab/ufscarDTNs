@@ -177,17 +177,21 @@ public class SaWClassifiedRouter extends ClassifierRouter {
 		} else if (this.getHost().getClassifierWeka().getFase()
 				.equals(DTNHost.test)) {
 
-			/*
-			 * anterior SaW, excluyendo classe baja for (int i = 0, n =
-			 * connections.size(); i < n; i++) {
-			 * 
-			 * Connection con = connections.get(i); DTNHost other =
-			 * con.getOtherNode(this.getHost()); Message started = null;
-			 * SaWClassifiedRouter tmprouter = (SaWClassifiedRouter) other
-			 * .getRouter(); if (tmprouter.evaluate() >= 2) { started =
-			 * tryAllMessages(con, messages); } if (started != null) { return
-			 * con; } }
-			 */
+			for (int i = 0, n = connections.size(); i < n; i++) {
+
+				Connection con = connections.get(i);
+				DTNHost other = con.getOtherNode(this.getHost());
+				Message started = null;
+				SaWClassifiedRouter tmprouter = (SaWClassifiedRouter) other
+						.getRouter();
+				if (tmprouter.evaluate() >= 2) {
+					started = tryAllMessages(con, messages);
+				}
+				if (started != null) {
+					return con;
+				}
+			}
+
 			/*
 			 * PROBABILITY VETOR 50 double[] classProbability = new double[5];
 			 * for (int i = 0, n = connections.size(); i < n; i++) { Connection
@@ -247,23 +251,24 @@ public class SaWClassifiedRouter extends ClassifierRouter {
 			 * 
 			 * }
 			 */
-			int classThisRouter = this.evaluate();
-			for (int i = 0, n = connections.size(); i < n; i++) {
-				Connection con = connections.get(i);
-				SaWClassifiedRouter otherRouter = (SaWClassifiedRouter) (con
-						.getOtherNode(this.getHost())).getRouter();
-				int classeThisHost = otherRouter.evaluate();
-				
-					
-
-				if ((classeThisHost > classThisRouter)||(classThisRouter==5 && classThisRouter==classeThisHost) ){
-					Message started = tryAllMessages(con, messages);
-					if (started != null) {
-						return con;
-					}
-				}
-
-			}
+			/*
+			 * Solo a classes mayores. Ex. Classe 5 tb a los iguales int
+			 * classThisRouter = this.evaluate(); for (int i = 0, n =
+			 * connections.size(); i < n; i++) { Connection con =
+			 * connections.get(i); SaWClassifiedRouter otherRouter =
+			 * (SaWClassifiedRouter) (con
+			 * .getOtherNode(this.getHost())).getRouter(); int classeThisHost =
+			 * otherRouter.evaluate();
+			 * 
+			 * 
+			 * 
+			 * if ((classeThisHost > classThisRouter)||(classThisRouter==5 &&
+			 * classThisRouter==classeThisHost) ){ Message started =
+			 * tryAllMessages(con, messages); if (started != null) { return con;
+			 * } }
+			 * 
+			 * }
+			 */
 
 		}
 
